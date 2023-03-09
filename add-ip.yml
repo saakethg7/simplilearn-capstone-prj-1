@@ -1,0 +1,32 @@
+---
+- name: Assign Elastic IP to EC2 instance
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    region: us-east-1
+    instance_id: i-0f011d98cd9f25c89
+    elastic_ip: 44.195.169.96
+
+  tasks:
+    - name: Get current allocation ID
+      ec2_eip_info:
+        region: "{{ region }}"
+        public_ip: "{{ elastic_ip }}"
+      register: eip_info
+
+    - name: Allocate Elastic IP if not already allocated
+      ec2_eip:
+        region: "{{ region }}"
+        state: present
+        public_ip: "{{ elastic_ip }}"
+      when: not eip_info.allocation_id
+
+    - name: Associate Elastic IP with EC2 instance
+      ec2_eip_association:
+        region: "{{ region }}"
+        instance_id: "{{ instance_id }}"
+        allocation_id: "{{ eip_info.allocation_id }}"
+      when: eip_info.allocation_id
+
+
