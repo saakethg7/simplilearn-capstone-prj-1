@@ -1,2 +1,5 @@
+[dev]
 localhost
-44.195.169.96
+[aws]
+44.209.45.77 ansible_ssh_user=ubuntu
+44.195.169.96 ansible_ssh_user=ubuntu
