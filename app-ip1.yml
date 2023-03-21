@@ -1,0 +1,23 @@
+---
+- name: Add Elastic IP address to EC2 instance
+  hosts: localhost
+  become: true
+  vars:
+    region: us-east-1
+
+  tasks:
+    - name: Associate Elastic IP address with instance
+      ec2_eip:
+        region: "{{ region }}"
+        device_id: i-046820428d3c2ba87
+        ip: 44.208.48.229
+    - name: Associate Elastic IP address with instance
+      ec2_eip:
+        region: "{{ region }}"
+        device_id: i-0490c9efef3f996b9
+        ip: 44.209.45.77
+    - name: Associate Elastic IP address with instance
+      ec2_eip:
+        region: "{{ region }}"
+        device_id: i-084f421940e20f30e
+        ip: 44.195.169.96
