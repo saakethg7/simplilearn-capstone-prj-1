@@ -1,0 +1,39 @@
+kind: Service
+apiVersion: v1 
+metadata:
+  name: myapp
+  namespace: default 
+  #labels: # are optional 
+spec:
+  type: NodePort # will publish a hostport/nodeport on every node/vm in the cluster ans also creates an 
+                 # internal virutal load balancer(kube will create dynamically lb ip) that can forward the request into a single/group of pods
+  selector: 
+    app: myapp
+  ports:
+    - name: http
+      port: 80  ## this is the port we are assinging to the LB created by kube 
+      targetPort: 8080 # this is the port of the app inside the container 
+      nodePort: 30001
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sb-app
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+     containers:
+       - name: sb-cont
+         image: springio/gs-spring-boot-docker:latest
+         #env:
+         #resources:
+

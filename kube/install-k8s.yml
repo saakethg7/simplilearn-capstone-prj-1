@@ -1,0 +1,26 @@
+---
+- hosts: all
+  become: true
+  vars:
+    kube_version: "1.23.6-00"
+    pod_network_cidr: "10.244.0.0/16"
+  tasks:
+    - name: Add Kubernetes repository
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    - name:
+      apt_repository:
+        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+
+    - name: Install Kubernetes components
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - kubelet={{ kube_version }}
+        - kubeadm={{ kube_version }}
+        - kubectl={{ kube_version }}
+
+   

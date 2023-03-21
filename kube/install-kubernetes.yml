@@ -1,0 +1,53 @@
+---
+- hosts: kubernetes_master
+  become: yes
+  tasks:
+    - name: Install Kubernetes packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg-agent
+          - software-properties-common
+        state: present
+
+    - name: Add Kubernetes GPG key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: Add Kubernetes APT repository
+      apt_repository:
+        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+        filename: kubernetes.list
+
+    - name: Install Kubernetes components
+      apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+
+    - name: Initialize Kubernetes cluster
+      command: kubeadm init --ignore-preflight-errors=all
+
+    - name: Copy Kubernetes configuration file to user's home directory
+      command: mkdir -p $HOME/.kube && cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && chown $(id -u):$(id -g) $HOME/.kube/config
+
+    - name: Install Calico network plugin
+      shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+    - name: Save join command to file
+      command: "kubeadm token create --print-join-command > /tmp/k8s-join-command"
+
+- hosts: kubernetes_nodes
+  become: yes
+  vars:
+    join_command: "{{ lookup('file', '/tmp/k8s-join-command') }}"
+  tasks:
+    - name: Join Kubernetes cluster
+      command: "{{ join_command }}"
+

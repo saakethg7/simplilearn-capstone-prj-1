@@ -1,0 +1,62 @@
+---
+- hosts: aws
+  become: yes
+  tasks:
+    - name: Perform update
+      command: sudo apt-get update
+
+    - name: move to keyrings folder
+      command: sudo mkdir -p /etc/apt/keyrings
+
+    - name: Download Packages
+      command: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+    - name: Download Packages
+      command: echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    - name: Perform Update
+      command: sudo apt-get update ; clear
+
+    - name: Install Docker
+      command: sudo apt-get install -y docker-ce
+
+    - name: Install Docker daemon
+      command: sudo wget https://raw.githubusercontent.com/lerndevops/labs/master/kubernetes/0-install/daemon.json -P /etc/docker
+
+    - name: Restart Docker Service
+      command: sudo systemctl restart docker.service
+
+    - name: Install Kubernetes packages
+      command: sudo apt-get install -y apt-transport-https ca-certificates curl
+
+    - name: Install Kubernetes GPG packages
+      command: sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+    - name: Install Kubernetes xenial packages
+      command: echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+    - name: Perform Update
+      command: sudo apt-get update
+
+    - name: Install KUBEADM
+      hosts: kubernetes-master
+      command: sudo apt-get install -y kubelet=1.23.6-00 kubeadm=1.23.6-00 kubectl=1.23.6-00
+
+
+    - name: Initialize Master Node
+      hosts: kubernetes-master	
+      command: sudo kubeadm init --ignore-preflight-errors=all
+
+
+    - name: Copy Kubernetes configuration file to user's home directory
+      hosts: kubernetes-master
+      command: mkdir -p $HOME/.kube && cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && chown $(id -u):$(id -g) $HOME/.kube/config
+
+    - name: Install Calico network plugin
+      hosts: kubernetes-master
+      shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+    - name: Install KUBEADM,KUBELET,KUBECTL In Worker Node
+      hosts: kubernetes-worker
+      command: sudo apt-get install -y kubelet=1.23.6-00 kubeadm=1.23.6-00 kubectl=1.23.6-00
+

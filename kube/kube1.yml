@@ -1,0 +1,33 @@
+    - name: Install Kubernetes packages
+      command: sudo apt-get install -y apt-transport-https ca-certificates curl
+
+    - name: Install Kubernetes GPG packages
+      command: sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+    - name: Install Kubernetes xenial packages
+      command: echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+    - name: Perform Update
+      command: sudo apt-get update ; clear
+
+    - name: Install KUBEADM,KUBELET,KUBECTL
+      hosts: kubernetes-master
+      command: sudo apt-get install -y kubelet=1.23.6-00 kubeadm=1.23.6-00 kubectl=1.23.6-00
+
+
+    - name: Initialize Master Node
+      hosts: kubernetes-master	
+      command: sudo kubeadm init --ignore-preflight-errors=all
+
+
+    - name: Copy Kubernetes configuration file to user's home directory
+      hosts: kubernetes-master
+      command: mkdir -p $HOME/.kube && cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && chown $(id -u):$(id -g) $HOME/.kube/config
+
+    - name: Install Calico network plugin
+      hosts: kubernetes-master
+      shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+    - name: Install KUBEADM,KUBELET,KUBECTL In Worker Node
+      hosts: kubernetes-worker
+      command: sudo apt-get install -y kubelet=1.23.6-00 kubeadm=1.23.6-00 kubectl=1.23.6-00

@@ -1,0 +1,36 @@
+kind: Service
+apiVersion: v1 
+metadata:
+  name: myapp
+  namespace: default 
+  #labels: # are optional 
+spec: 
+  type: ClusterIP # it is an internal virutal load balancer(kube will create dynamically lb ip) that can forward the request into a single/group of pods
+  selector: 
+    app: myapp
+  ports:
+    - name: http
+      port: 80  ## this is the port we are assinging to the LB created by kube 
+      targetPort: 3000 # this is the port of the app inside the container
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ns-dep
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+     containers:
+       - name: myapp-cont
+         image: springio/gs-spring-boot-docker:latest
+         #env:
+         #resources:
+
