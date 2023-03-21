@@ -1,0 +1,12 @@
+- name: Take etcd backup
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Take etcd backup
+      shell: |
+        etcdctl snapshot save /etcd-backup/etcd-backup-`date +"%d-%m-%Y-%H-%M"`.db \
+        --endpoints=https://etcd-server:2379 \
+        --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+        --cert=/etc/kubernetes/pki/etcd/server.crt \
+        --key=/etc/kubernetes/pki/etcd/server.key
+

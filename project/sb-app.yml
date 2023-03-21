@@ -1,0 +1,61 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sb-app1
+  labels:
+    app: sb-app1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sb-app1
+  template:
+    metadata:
+      name: sb-app1
+      labels:
+        app: sb-app1
+    spec:
+      containers:
+        - name: sb-cont1
+          image: springio/gs-spring-boot-docker:latest
+          resources:
+            limits:
+              cpu: 100m ## 10% of 1 core on your system
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: sb-service
+spec:
+  type: NodePort  ## this is default if we do not type in service definition
+  selector:
+    app: sb-app1
+  ports:
+   - protocol: TCP
+     port: 80
+     targetPort: 8080
+     nodePort: 32708
+
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sb-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sb-app1
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
