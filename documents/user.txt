@@ -1,0 +1,9 @@
+kubectl create clusterrole pod-user --verb=create,list,get,update,delete --resource=pods
+kubectl create clusterrolebinding <binding-name> --clusterrole=<cluster-role-name> --serviceaccount=<namespace>:<service-account-name>
+
+kubectl --kubeconfig=/etc/kubernetes/admin.conf create role pod-user --verb=create,list,get,update,delete --resource=pods
+kubectl --kubeconfig=/etc/kubernetes/admin.conf create rolebinding user4-access --user=user4 --role=pod-user
+
+kubectl --kubeconfig=/home/certs/user4.conf get pods
+
+

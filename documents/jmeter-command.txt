@@ -1,0 +1,6 @@
+jmeter -n -t <location of jmeter script> -l <location of result file>
+
+jmeter -n -t "E:\simplilearn\cap-stone\apache-jmeter-5.5\apache-jmeter-5.5\bin\Simplilearn\Simplilearn example.jmx" -l E:\simplilearn\cap-stone\apache-jmeter-5.5\apache-jmeter-5.5\bin\Simplilearn\
+
+
+jmeter -n -t "E:\simplilearn\cap-stone\apache-jmeter-5.5\apache-jmeter-5.5\bin\Simplilearn\Simplilearn example.jmx" -l E:\simplilearn\cap-stone\apache-jmeter-5.5\apache-jmeter-5.5\bin\Simplilearn\
