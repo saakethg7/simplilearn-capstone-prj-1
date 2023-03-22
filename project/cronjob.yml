@@ -1,9 +1,0 @@
-- name: Schedule etcd backup
-  hosts: localhost
-  tasks:
-    - name: Add cron job
-      cron:
-        name: "etcd backup"
-        minute: "*/10"
-        job: "ansible-playbook /home/ubuntu/project/etcd-bkup.yml "
-
